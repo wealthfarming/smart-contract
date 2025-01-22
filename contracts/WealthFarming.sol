@@ -2,12 +2,13 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Pausable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/access/AccessControl.sol";
 
-contract WealthFarming is ERC721URIStorage, Ownable, Pausable {
-    uint256 private _tokenIds;
+contract WealthFarming is ERC721URIStorage, AccessControl, Pausable {
+
+    bytes32 public constant EDITOR_ROLE = keccak256("EDITOR_ROLE");
 
     struct PendingTransaction {
         address buyer;
@@ -67,28 +68,19 @@ contract WealthFarming is ERC721URIStorage, Ownable, Pausable {
     event PendingSaleProcessed(uint256 saleId, uint256 timestamp);
 
     constructor(address usdcAddress) ERC721("WealthFarming NFT", "WFNFT") {
+        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         usdcToken = IERC20(usdcAddress);
     }
 
-    // ---------------------- Quản lý quyền ----------------------
-    modifier onlyEditor() {
-        require(msg.sender == editor, "Only editor can perform this action");
-        _;
-    }
-
-    function setEditor(address newEditor) external onlyOwner {
-        editor = newEditor;
-        emit EditorUpdated(newEditor);
-    }
 
     // ---------------------- Quản lý tài sản ----------------------
-    function addAsset(string memory _name, string memory _code, uint256 _value) external onlyEditor {
+    function addAsset(string memory _name, string memory _code, uint256 _value) external onlyRole(EDITOR_ROLE) {
         assets.push(Asset({value: _value, name: _name, code: _code}));
         totalAssetValue += _value;
         emit AssetAdded(_name, _code, _value);
     }
 
-    function updateAsset(uint256 index, uint256 value) external onlyEditor {
+    function updateAsset(uint256 index, uint256 value) external onlyRole(EDITOR_ROLE)  {
         require(index < assets.length, "Invalid asset index");
         totalAssetValue = totalAssetValue - assets[index].value + value;
         assets[index].value = value;
@@ -100,13 +92,13 @@ contract WealthFarming is ERC721URIStorage, Ownable, Pausable {
     }
 
     // ---------------------- Quản lý nợ ----------------------
-    function addDebt(string memory _name, string memory _code, uint256 _value) external onlyEditor {
+    function addDebt(string memory _name, string memory _code, uint256 _value) external onlyRole(EDITOR_ROLE)  {
         debts.push(Debt({value: _value, name: _name, code: _code}));
         totalDebtValue += _value;
         emit DebtAdded(_name, _code, _value);
     }
 
-    function updateDebt(uint256 index, uint256 value) external onlyEditor {
+    function updateDebt(uint256 index, uint256 value) external onlyRole(EDITOR_ROLE)  {
         require(index < debts.length, "Invalid debt index");
         totalDebtValue = totalDebtValue - debts[index].value + value;
         debts[index].value = value;
@@ -146,7 +138,7 @@ contract WealthFarming is ERC721URIStorage, Ownable, Pausable {
         transactionCounter++;
     }
 
-    function finalizeMint(uint256 transactionId) external onlyOwner {
+    function finalizeMint(uint256 transactionId) external onlyRole(DEFAULT_ADMIN_ROLE)  {
         PendingTransaction storage txn = pendingTransactions[transactionId];
         require(!txn.processed, "Transaction already processed");
         require(block.timestamp >= txn.timestamp + 1 days, "T+1 condition not met");
@@ -190,7 +182,7 @@ contract WealthFarming is ERC721URIStorage, Ownable, Pausable {
         emit PendingSaleCreated(saleCounter - 1, tokenId, msg.sender, to, price, block.timestamp);
     }
 
-    function finalizeSale(uint256 saleId) external onlyOwner {
+    function finalizeSale(uint256 saleId) external onlyRole(DEFAULT_ADMIN_ROLE) {
         PendingSale storage sale = pendingSales[saleId];
         require(!sale.processed, "Sale already processed");
         require(block.timestamp >= sale.timestamp + 1 days, "T+1 condition not met");
@@ -216,11 +208,11 @@ contract WealthFarming is ERC721URIStorage, Ownable, Pausable {
     }
 
     // ---------------------- Tạm dừng hợp đồng ----------------------
-    function pauseContract() external onlyOwner {
+    function pause() external onlyRole(DEFAULT_ADMIN_ROLE) {
         _pause();
     }
 
-    function unpauseContract() external onlyOwner {
+    function unpause() external onlyRole(DEFAULT_ADMIN_ROLE) {
         _unpause();
     }
 
@@ -235,5 +227,41 @@ contract WealthFarming is ERC721URIStorage, Ownable, Pausable {
 
     function getMarketplaceListings() external view returns (uint256[] memory) {
     
+    }
+
+    /**
+     * @dev Add Editor
+     *
+     * @param _editor is address of editor
+     *  
+     * Requirements:
+     *
+     * - Only admin
+     */
+    function grantEditor(address _editor) internal onlyRole(DEFAULT_ADMIN_ROLE) {
+        grantRole(EDITOR_ROLE, _editor);
+    }
+
+    /**
+     * @dev Revoke Editor
+     *
+     * @param _editor is address of editor
+     *  
+     * Requirements:
+     *
+     * - Only admin
+     */
+    function revokeEditor(address _editor) internal onlyRole(DEFAULT_ADMIN_ROLE) {
+        revokeRole(EDITOR_ROLE, _editor);
+    }
+
+     // Override required by Solidity
+    function supportsInterface(bytes4 interfaceId)
+        public
+        view
+        override(ERC721URIStorage, AccessControl)
+        returns (bool)
+    {
+        return super.supportsInterface(interfaceId);
     }
 }

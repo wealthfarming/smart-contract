@@ -9,9 +9,9 @@ import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 contract WealthFarming is ERC721URIStorage, AccessControl, Pausable, ReentrancyGuard{
 
-    bytes32 public constant EDITOR_ROLE = keccak256("EDITOR_ROLE");
-
-    struct PendingMintNFT {
+    struct MintNFT {
+        uint256 id;
+        uint256 navId;
         address buyer;
         uint256 amount;
         uint256 timestamp;
@@ -27,27 +27,23 @@ contract WealthFarming is ERC721URIStorage, AccessControl, Pausable, ReentrancyG
         bool processed;
     }
 
-    struct Asset {
-        uint256 value;
-        string name;
-        string code;
-    }
-
-    struct Debt {
-        uint256 value;
-        string name;
-        string code;
+    struct NavHistory {
+        uint256 id;
+        uint256 price;
+        uint256 winRate;
+        uint256 risk;
+        uint256 timestamp;
     }
 
     /**
      * @dev Token USDC use for trade
      */
-    IERC20 public usdcToken;
+    IERC20 public usdcToken = IERC20(0xF62B3a6571E0A05E60663D39EB961e0e1814219d);
 
     /**
      * @dev decimal of token USDC
      */
-    uint256 public usdcDecimal;
+    uint256 public usdcDecimal = 18;
 
     /**
     * @dev counter id for nft 
@@ -57,7 +53,7 @@ contract WealthFarming is ERC721URIStorage, AccessControl, Pausable, ReentrancyG
     /**
      * @dev counter for mint nft pending transaction
      */
-    uint256 public transactionCounter = 0; 
+    uint256 public mintNFTCounter = 0; 
 
     /**
      * @dev counter for mint nft pending transaction
@@ -65,19 +61,9 @@ contract WealthFarming is ERC721URIStorage, AccessControl, Pausable, ReentrancyG
     uint256 public saleCounter = 0;
 
     /**
-     * @dev total asset value is sum of value of all assets
-     */
-    uint256 public totalAssetValue = 0;
-
-    /**
-     * @dev total debt value is sum of value of all debt
-     */
-    uint256 public totalDebtValue = 0; 
-
-    /**
-     * @dev total fee from trading action, admin can withdraw
-     */
-    uint256 private totalFeeValue = 0; 
+    * @dev nav counter
+    */
+    uint256 public navCounter = 0;
 
     /**
      * @dev Fee, this is the fee that will be charged on each transaction.
@@ -97,7 +83,7 @@ contract WealthFarming is ERC721URIStorage, AccessControl, Pausable, ReentrancyG
     /**
      * @dev Mapping for tracking pending mint transaction
      */
-    mapping(uint256 => PendingMintNFT) public pendingMintNFTs;
+    mapping(uint256 => MintNFT) public pendingMintNFTs;
 
     /**
      * @dev Mapping for tracking pending sell
@@ -110,14 +96,19 @@ contract WealthFarming is ERC721URIStorage, AccessControl, Pausable, ReentrancyG
     mapping(address => uint256[]) public userNFTs;
 
     /**
+    * @dev mapper for tracking wallet address with deposit transaction 
+    */
+    mapping(address => MintNFT[]) public deposits;
+
+    /**
     * @dev list of asset
     */
-    Asset[] public assets;
+    NavHistory[] public navHistory;
 
-    /** 
-    * @dev list of debt
+    /**
+    * @dev nav price
     */
-    Debt[] public debts; 
+    uint256 navPrice;
 
     /**
      * @dev Address representing the native token, e.g., Ether (ETH) on Ethereum.
@@ -130,35 +121,18 @@ contract WealthFarming is ERC721URIStorage, AccessControl, Pausable, ReentrancyG
     event DebtAdded(string name, string code, uint256 value, uint256 index);
     event DebtUpdated(uint256 index, uint256 value);
     event NAVUpdated(uint256 newNAV, uint256 timestamp);
+    event MintNFTRequest(address buyer, uint256 amount, uint256 transactionId, uint256 timestamp);
+    event CancelMintNFT(uint256 transactionId);
     event NFTMinted(address indexed buyer, uint256 tokenId, uint256 price, uint256 timestamp);
     event PendingTransactionProcessed(uint256 transactionId, uint256 timestamp, uint256 refund);
     event NFTTransferred(uint256 tokenId, address from, address to, uint256 price);
     event PendingSaleCreated(uint256 saleId, uint256 tokenId, address seller, address buyer, uint256 price, uint256 timestamp);
     event PendingSaleProcessed(uint256 saleId, uint256 timestamp);
 
-    constructor(
-        address _usdcAddress, 
-        uint256 _usdcDecimal,
-        address _editor,
-        address _receiveFee
-    )  ERC721("WealthFarming NFT", "WFNFT") {
+    constructor()  ERC721("WealthFarming NFT", "WFNFT") {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
-        _grantRole(EDITOR_ROLE, _editor);
-        usdcDecimal = _usdcDecimal;
-        usdcToken = IERC20(_usdcAddress);
-        receiveFee = _receiveFee;
+        receiveFee = msg.sender;
     }
-
-    /**
-     * @dev Receives Ether sent directly to the contract address, typically used to handle accidental transfers.
-     */
-    receive() external payable {}
-
-    /**
-     * @dev Fallback function to handle Ether transfers, useful for managing accidental transfers to the contract.
-     */
-    fallback() external payable {}
-
 
     modifier notContract() {
         require(!isContract(msg.sender), "This function is not allowed in a contract");
@@ -166,112 +140,39 @@ contract WealthFarming is ERC721URIStorage, AccessControl, Pausable, ReentrancyG
     }
   
     /**
-     * @dev Add asset
-     *
-     * @param _name is address of editor
-     * @param _code is code of asset
-     * @param _value is value of asset
-     *  
-     * Requirements:
-     *
-     * - Only editor
-     */
-    function addAsset(
-        string memory _name, 
-        string memory _code, 
-        uint256 _value
-    ) external onlyRole(EDITOR_ROLE) {
-        assets.push(Asset({value: _value, name: _name, code: _code}));
-        totalAssetValue += _value;
-        uint256 _len = assets.length;
-        emit AssetAdded(_name, _code, _value, _len - 1);
-    }
-
-
-    /**
-     * @dev update asset
-     *
-     * @param _index is index of asset on list
-     * @param _value is value of asset
-     *  
-     * Requirements:
-     *
-     * - Only editor
-     */
-    function updateAsset(uint256 _index, uint256 _value) external onlyRole(EDITOR_ROLE)  {
-        require(_index < assets.length, "Invalid asset index");
-        totalAssetValue = totalAssetValue - assets[_index].value + _value;
-        assets[_index].value = _value;
-        emit AssetUpdated(_index, _value);
-    }
-
-
-    /**
-     * @dev get all assets
+     * @dev Push nav value to array
+     * @param _navPrice is nav price
+     * @param _winRate is win rate
+     * @param _risk is risk 
      *
      */
-    function getAssets() external view returns (Asset[] memory) {
-        return assets;
-    }
+    function calculateNAV(uint256 _navPrice, uint256 _winRate, uint256 _risk) external onlyRole(DEFAULT_ADMIN_ROLE)  {
+        navCounter++;
+        uint256 len = navHistory.length;
+        if (len == 0) {
+            navPrice = _navPrice;
 
-    
-    /**
-     * @dev Add debt
-     *
-     * @param _name is name of debt
-     * @param _code is code of debt
-     * @param _value is value of debt
-     *  
-     * Requirements:
-     *
-     * - Only editor
-     */
-    function addDebt(
-        string memory _name, 
-        string memory _code, 
-        uint256 _value
-    ) external onlyRole(EDITOR_ROLE)  {
-        debts.push(Debt({value: _value, name: _name, code: _code}));
-        totalDebtValue += _value;
-        uint256 _len = debts.length;
-        emit DebtAdded(_name, _code, _value, _len);
-    }
+            navHistory.push(NavHistory({
+                id: navCounter,
+                price: _navPrice,
+                winRate: _winRate,
+                risk: _risk,
+                timestamp: block.timestamp
+            }));
+        } else {
+            NavHistory memory nav = navHistory[len - 1];
+            require(block.timestamp >= nav.timestamp + 1 days, "CalculateNAV: T+1 condition not met");
 
-    /**
-     * @dev update debt
-     *
-     * @param _index is index of debt 
-     * @param _value is value of asset
-     *  
-     * Requirements:
-     *
-     * - Only editor
-     */
-    function updateDebt(uint256 _index, uint256 _value) external onlyRole(EDITOR_ROLE)  {
-        require(_index < debts.length, "Invalid debt index");
-        totalDebtValue = totalDebtValue - debts[_index].value + _value;
-        debts[_index].value = _value;
-        emit DebtUpdated(_index, _value);
-    }
+            navPrice = _navPrice;
 
-    /**
-     * @dev get all debts
-     *
-     */
-    function getDebts() external view returns (Debt[] memory) {
-        return debts;
-    }
-
-
-    /**
-     * @dev calculate nav value
-     * nav = (total asset value - total debt value) / total nft
-     *
-     */
-    function calculateNAV() public view returns (uint256) {
-        uint256 totalNFTs = nextTokenId - 1; // Số lượng NFT đã phát hành
-        require(totalNFTs > 0, "No NFTs minted yet");
-        return (totalAssetValue - totalDebtValue) * (1 ** usdcDecimal) / totalNFTs;
+            navHistory.push(NavHistory({
+                id: navCounter,
+                price: _navPrice,
+                winRate: _winRate,
+                risk: _risk,
+                timestamp: block.timestamp
+            }));
+        }
     }
 
     /**
@@ -282,30 +183,44 @@ contract WealthFarming is ERC721URIStorage, AccessControl, Pausable, ReentrancyG
      */
     function mintNFT(uint256 amount) external whenNotPaused nonReentrant notContract {
         
-        require(amount > 0, "Amount must be greater than 0");
+        require(amount > 0, "MintNFT: Amount must be greater than 0");
+        require(usdcToken.allowance(msg.sender, address(this)) >= amount, "MintNFT: Insufficient allowance");
 
-        require(usdcToken.transferFrom(msg.sender, address(this), amount), "USDC transfer failed");
+        // transfer to this address
+        usdcToken.transferFrom(msg.sender, address(this), amount);
 
-        pendingMintNFTs[transactionCounter] = PendingMintNFT({
+        NavHistory memory nav = navHistory[navHistory.length - 1];
+
+        MintNFT memory mintNFTRequest = MintNFT({
+            id: mintNFTCounter,
+            navId: nav.id,
             buyer: msg.sender,
             amount: amount,
             timestamp: block.timestamp,
             processed: false
         });
 
-        transactionCounter++;
+        // Save pending mint nft request to map of transaction counter
+        pendingMintNFTs[mintNFTCounter] = mintNFTRequest;
+        
+        // Save to map of deposit of user
+        deposits[msg.sender].push(mintNFTRequest);
+
+        emit MintNFTRequest(msg.sender, amount, mintNFTCounter, block.timestamp);
+        mintNFTCounter++;
     }
 
     /**
      * @dev finalize mint nft
-     * @param _transactionId is transaction id of 
+     * @param _transactionId is transaction id of mint nft request
      */
     function finalizeMint(uint256 _transactionId) external onlyRole(DEFAULT_ADMIN_ROLE)  {
-        uint256 navPrice = calculateNAV();
-        PendingMintNFT storage txn = pendingMintNFTs[_transactionId];
-        require(!txn.processed, "Transaction already processed");
-        require(block.timestamp >= txn.timestamp + 1 days, "T+1 condition not met");
+        MintNFT storage txn = pendingMintNFTs[_transactionId];
+        NavHistory memory nav = navHistory[navHistory.length - 1];
 
+        require(txn.navId == nav.id - 1, "FinalizeMint: Transaction not in pool");
+        require(!txn.processed, "FinalizeMint: Transaction already processed");
+        
         txn.processed = true;
 
         // calculate fee per nav price
@@ -314,6 +229,8 @@ contract WealthFarming is ERC721URIStorage, AccessControl, Pausable, ReentrancyG
         // find number of NFT to mint
         uint256 numNFT = txn.amount / (navPrice + fee);
         
+        uint256 totalFeeValue = 0;
+
         // mint nft and transfer to buyer
         for (uint256 i = 0; i < numNFT; i++) {
             uint256 tokenId = nextTokenId++;
@@ -328,17 +245,45 @@ contract WealthFarming is ERC721URIStorage, AccessControl, Pausable, ReentrancyG
 
         // refund usdc to buyer
         usdcToken.transfer(txn.buyer, refundAmount);
-        
+
+        // send fee to admin
+        usdcToken.transfer(receiveFee, totalFeeValue);
+
         emit PendingTransactionProcessed(_transactionId, block.timestamp, refundAmount);
+    }
+
+    /**
+     * @dev cancel mint nft
+     * @param _transactionId is transaction id of mint nft request
+     */
+    function cancelMint(uint256 _transactionId) external whenNotPaused nonReentrant notContract {
+        MintNFT storage txn = pendingMintNFTs[_transactionId];
+        require(msg.sender == txn.buyer, "CancelMint: Buyer not match");
+        require(!txn.processed, "CancelMint: Transaction already processed");
+
+        txn.processed = true;
+
+        // refund usdc to buyer
+        usdcToken.transfer(txn.buyer, txn.amount);
+
+        emit CancelMintNFT(_transactionId);
+    }
+
+    /**
+     * @dev get all deposits of an address
+     */
+    function getAllDeposits() external view returns(MintNFT[] memory) {
+        MintNFT[] memory transactions = deposits[msg.sender];
+        return transactions;
     }
 
     /**
      * @dev Get Pending Transaction 
      *
      */
-    function getPendingTransactions() external view returns (PendingMintNFT[] memory) {
-        PendingMintNFT[] memory transactions = new PendingMintNFT[](transactionCounter);
-        for (uint256 i = 0; i < transactionCounter; i++) {
+    function getPendingTransactions() external view returns (MintNFT[] memory) {
+        MintNFT[] memory transactions = new MintNFT[](mintNFTCounter);
+        for (uint256 i = 0; i < mintNFTCounter; i++) {
             transactions[i] = pendingMintNFTs[i];
         }
         return transactions;
@@ -405,32 +350,6 @@ contract WealthFarming is ERC721URIStorage, AccessControl, Pausable, ReentrancyG
 
     function getMarketplaceListings() external view returns (uint256[] memory) {
     
-    }
-
-    /**
-     * @dev Add Editor
-     *
-     * @param _editor is address of editor
-     *  
-     * Requirements:
-     *
-     * - Only admin
-     */
-    function grantEditor(address _editor) internal onlyRole(DEFAULT_ADMIN_ROLE) {
-        grantRole(EDITOR_ROLE, _editor);
-    }
-
-    /**
-     * @dev Revoke Editor
-     *
-     * @param _editor is address of editor
-     *  
-     * Requirements:
-     *
-     * - Only admin
-     */
-    function revokeEditor(address _editor) internal onlyRole(DEFAULT_ADMIN_ROLE) {
-        revokeRole(EDITOR_ROLE, _editor);
     }
 
     /**

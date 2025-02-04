@@ -8,6 +8,7 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "./interfaces/IBEQNFT.sol";
 
+
 contract WealthFarming is AccessControl, Pausable, ReentrancyGuard{
 
     struct BuyNFT {
@@ -22,6 +23,7 @@ contract WealthFarming is AccessControl, Pausable, ReentrancyGuard{
 
     struct SellNFT {
         uint256 id;
+        uint256 navId;
         address seller;
         address buyer;
         uint256 tokenId;
@@ -83,22 +85,22 @@ contract WealthFarming is AccessControl, Pausable, ReentrancyGuard{
     /**
      * @dev Mapping for tracking pending mint transaction
      */
-    mapping(uint256 => BuyNFT) public pendingBuyNFT;
-
-    /**
-     * @dev Mapping for tracking pending mint transaction
-     */
-    mapping(address => mapping(uint256 => BuyNFT)) public mapAddressWithBuyNFT;
+    mapping(uint256 => BuyNFT) private pendingBuyNFT;
 
     /**
      * @dev Mapping of total buy nft of an address
      */
-    mapping(address => uint256[]) public buyRequestIdOfAddress;
+    mapping(address => uint256[]) private buyRequestIdOfAddress;
 
     /**
      * @dev Mapping for tracking pending sell
      */
-    mapping(uint256 => SellNFT) public pendingSellNFT; 
+    mapping(uint256 => SellNFT) private pendingSellNFT; 
+
+    /**
+     * @dev Mapping of total buy nft of an address
+     */
+    mapping(address => uint256[]) private sellRequestIdOfAddress;
    
     /**
     * @dev list of asset
@@ -122,13 +124,13 @@ contract WealthFarming is AccessControl, Pausable, ReentrancyGuard{
     event DebtUpdated(uint256 index, uint256 value);
     event NAVUpdated(uint256 newNAV, uint256 timestamp);
     event BuyNFTRequest(address buyer, uint256 amount, uint256 transactionId, uint256 timestamp);
-    event CancelMintNFT(uint256 transactionId);
+    event CancelBuyNFT(uint256 transactionId);
+    event CancelSellNFT(uint256 transactionId);
     event NFTMinted(address indexed buyer, uint256 price, uint256 timestamp);
-    event PendingTransactionProcessed(uint256 transactionId, uint256 timestamp, uint256 refund);
-    event NFTTransferred(uint256 tokenId, address from, address to, uint256 price);
+    event PendingBuyNFTProcessed(uint256 transactionId, uint256 timestamp, uint256 refund);
+    event PendingSellNFTProcessed(uint256 sellId, uint256 tokenId, uint256 timestamp);
     event PendingSellCreated(uint256 sellId, uint256 tokenId, address seller,uint256 timestamp);
-    event PendingSaleProcessed(uint256 sellId, uint256 price, uint256 timestamp);
-
+ 
     constructor() {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         receiveFee = msg.sender;
@@ -144,7 +146,6 @@ contract WealthFarming is AccessControl, Pausable, ReentrancyGuard{
      * @param _navPrice is nav price
      * @param _winRate is win rate
      * @param _risk is risk 
-     *
      */
     function calculateNAV(uint256 _navPrice, uint256 _winRate, uint256 _risk) external onlyRole(DEFAULT_ADMIN_ROLE)  {
         navCounter++;
@@ -191,7 +192,8 @@ contract WealthFarming is AccessControl, Pausable, ReentrancyGuard{
 
         NavHistory memory nav = navHistory[navHistory.length - 1];
 
-        BuyNFT memory buyNFTRequest = BuyNFT({
+        // Save pending mint nft request to map of transaction counter
+        pendingBuyNFT[buyNFTCounter] = BuyNFT({
             id: buyNFTCounter,
             navId: nav.id,
             buyer: msg.sender,
@@ -200,14 +202,16 @@ contract WealthFarming is AccessControl, Pausable, ReentrancyGuard{
             processed: false,
             refund: 0
         });
-
-        // Save pending mint nft request to map of transaction counter
-        pendingBuyNFT[buyNFTCounter] = buyNFTRequest;
         
-        // Save to map of deposit of user
-        mapAddressWithBuyNFT[msg.sender][buyNFTCounter] = buyNFTRequest;
+        // Save buy id request to mapping
+        buyRequestIdOfAddress[msg.sender].push(buyNFTCounter);
 
-        emit BuyNFTRequest(msg.sender, amount, buyNFTCounter, block.timestamp);
+        emit BuyNFTRequest(
+            msg.sender, 
+            amount, 
+            buyNFTCounter, 
+            block.timestamp
+        );
         buyNFTCounter++;
     }
 
@@ -249,21 +253,22 @@ contract WealthFarming is AccessControl, Pausable, ReentrancyGuard{
 
         // send fee to admin
         usdcToken.transfer(receiveFee, totalFeeValue);
-        
-        // synchonize transaction
-        mapAddressWithBuyNFT[txn.buyer][_transactionId] = txn;
 
-        emit PendingTransactionProcessed(_transactionId, block.timestamp, refundAmount);
+        emit PendingBuyNFTProcessed(
+            _transactionId, 
+            block.timestamp, 
+            refundAmount
+        );
     }
 
     /**
      * @dev cancel mint nft
      * @param _transactionId is transaction id of mint nft request
      */
-    function cancelMint(uint256 _transactionId) external whenNotPaused nonReentrant notContract {
+    function cancelBuy(uint256 _transactionId) external whenNotPaused nonReentrant notContract {
         BuyNFT storage txn = pendingBuyNFT[_transactionId];
-        require(msg.sender == txn.buyer, "CancelMint: Buyer not match");
-        require(!txn.processed, "CancelMint: Transaction already processed");
+        require(msg.sender == txn.buyer, "cancelBuy: Buyer not match");
+        require(!txn.processed, "cancelBuy: Transaction already processed");
 
         // refund usdc to buyer
         usdcToken.transfer(txn.buyer, txn.amount);
@@ -271,10 +276,7 @@ contract WealthFarming is AccessControl, Pausable, ReentrancyGuard{
         txn.processed = true;
         txn.refund = txn.amount;
         
-        // synchonize transaction
-        mapAddressWithBuyNFT[txn.buyer][_transactionId] = txn;
-
-        emit CancelMintNFT(_transactionId);
+        emit CancelBuyNFT(_transactionId);
     }
 
     /**
@@ -288,10 +290,13 @@ contract WealthFarming is AccessControl, Pausable, ReentrancyGuard{
             "Account does not own the specified ERC721 token ID"
         );
 
-        nftToken.safeTransferFrom(msg.sender, address(this), _tokenId);
+        // Get latest NAV info
+        NavHistory memory nav = navHistory[navHistory.length - 1];
 
-        SellNFT memory sellNFTRequest = SellNFT({
+        // Store pending sell request
+        pendingSellNFT[sellNFTCounter] = SellNFT({
             id: sellNFTCounter,
+            navId: nav.id,
             price: 0,
             seller: msg.sender,
             buyer: address(this),
@@ -300,16 +305,63 @@ contract WealthFarming is AccessControl, Pausable, ReentrancyGuard{
             processed: false
         });
 
-        pendingSellNFT[sellNFTCounter] = sellNFTRequest;
+        // Transfer nft from owner to marker contract
+        nftToken.safeTransferFrom(msg.sender, address(this), _tokenId);
 
+        sellRequestIdOfAddress[msg.sender].push(sellNFTCounter);
+
+        // Increase sell counter id
+        sellNFTCounter++;
+
+        // Emit event
         emit PendingSellCreated(
             sellNFTCounter, 
             _tokenId, 
             msg.sender,
             block.timestamp
         );
+    }
+
+    /**
+     * @dev finalize sell nft
+     * @param _sellId is id sell request
+     */
+    function finalizeSellNFT(uint256 _sellId) external onlyRole(DEFAULT_ADMIN_ROLE)  {
+        SellNFT storage txn = pendingSellNFT[_sellId];
+        NavHistory memory nav = navHistory[navHistory.length - 1];
+
+        require(txn.navId == nav.id - 1, "FinalizeMint: Transaction not in pool");
+        require(!txn.processed, "FinalizeMint: Transaction already processed");
         
-        sellNFTCounter++;
+        txn.processed = true;
+
+        // calculate fee per nav price
+        uint256 fee = navPrice * baseFee / DISCOUNT_FACTOR;
+
+        // refund usdc to buyer
+        usdcToken.transfer(txn.buyer, navPrice - fee);
+
+        // send fee to admin
+        usdcToken.transfer(receiveFee, fee);
+
+        emit PendingSellNFTProcessed(_sellId, txn.tokenId, block.timestamp);
+    }
+
+    /**
+     * @dev cancel sell nft
+     * @param _sellId is id sell request
+     */
+    function cancelSell(uint256 _sellId) external whenNotPaused nonReentrant notContract {
+        SellNFT storage txn = pendingSellNFT[_sellId];
+        require(msg.sender == txn.seller, "CancelSell: Buyer not match");
+        require(!txn.processed, "CancelSell: Transaction already processed");
+
+        // refund usdc to buyer
+        nftToken.safeTransferFrom(address(this), txn.seller, txn.tokenId);
+
+        txn.processed = true;
+
+        emit CancelSellNFT(_sellId);
     }
 
     /**
@@ -326,6 +378,20 @@ contract WealthFarming is AccessControl, Pausable, ReentrancyGuard{
         return transactions;
     }
 
+    /**
+     * @dev get all buy request of an address
+     */
+    function getAllSellRequest() external view returns(SellNFT[] memory) {
+        SellNFT[] memory transactions = new SellNFT[](sellRequestIdOfAddress[msg.sender].length);
+        uint256[] memory listId = sellRequestIdOfAddress[msg.sender];
+
+        for (uint8 i = 0; i < listId.length;i++) {
+            transactions[i] = pendingSellNFT[listId[i]];
+        }
+        
+        return transactions;
+    }
+
     function pause() external onlyRole(DEFAULT_ADMIN_ROLE) {
         _pause();
     }
@@ -333,7 +399,6 @@ contract WealthFarming is AccessControl, Pausable, ReentrancyGuard{
     function unpause() external onlyRole(DEFAULT_ADMIN_ROLE) {
         _unpause();
     }
-
 
     /**
      * @dev Sweeps tokens from the contract to the admin's address.
@@ -350,7 +415,6 @@ contract WealthFarming is AccessControl, Pausable, ReentrancyGuard{
             IERC20(_token).transfer(msg.sender, balance);
         }
     }
-
    
     function isContract(address account) internal view returns (bool) {
         // This method relies on extcodesize, which returns 0 for contracts in

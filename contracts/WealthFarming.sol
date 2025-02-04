@@ -1,24 +1,27 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.24;
 
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/utils/Pausable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "./interfaces/IBEQNFT.sol";
 
-contract WealthFarming is ERC721URIStorage, AccessControl, Pausable, ReentrancyGuard{
+contract WealthFarming is AccessControl, Pausable, ReentrancyGuard{
 
-    struct MintNFT {
+    struct BuyNFT {
         uint256 id;
         uint256 navId;
         address buyer;
         uint256 amount;
+        uint256 refund;
         uint256 timestamp;
         bool processed;
     }
 
-    struct PendingSale {
+    struct SellNFT {
+        uint256 id;
         address seller;
         address buyer;
         uint256 tokenId;
@@ -40,25 +43,22 @@ contract WealthFarming is ERC721URIStorage, AccessControl, Pausable, ReentrancyG
      */
     IERC20 public usdcToken = IERC20(0xF62B3a6571E0A05E60663D39EB961e0e1814219d);
 
+    IBEQNFT public nftToken = IBEQNFT(0x742C882b0B82Bc75Dc07c526c0DEE3f92a3Bef18);
+
     /**
      * @dev decimal of token USDC
      */
     uint256 public usdcDecimal = 18;
 
     /**
-    * @dev counter id for nft 
-    */
-    uint256 public nextTokenId = 1;
+     * @dev counter for mint nft pending transaction
+     */
+    uint256 public buyNFTCounter = 0; 
 
     /**
      * @dev counter for mint nft pending transaction
      */
-    uint256 public mintNFTCounter = 0; 
-
-    /**
-     * @dev counter for mint nft pending transaction
-     */
-    uint256 public saleCounter = 0;
+    uint256 public sellNFTCounter = 0;
 
     /**
     * @dev nav counter
@@ -83,23 +83,23 @@ contract WealthFarming is ERC721URIStorage, AccessControl, Pausable, ReentrancyG
     /**
      * @dev Mapping for tracking pending mint transaction
      */
-    mapping(uint256 => MintNFT) public pendingMintNFTs;
+    mapping(uint256 => BuyNFT) public pendingBuyNFT;
+
+    /**
+     * @dev Mapping for tracking pending mint transaction
+     */
+    mapping(address => mapping(uint256 => BuyNFT)) public mapAddressWithBuyNFT;
+
+    /**
+     * @dev Mapping of total buy nft of an address
+     */
+    mapping(address => uint256[]) public buyRequestIdOfAddress;
 
     /**
      * @dev Mapping for tracking pending sell
      */
-    mapping(uint256 => PendingSale) public pendingSales; 
-
-    /**
-    * @dev Mapper for tracking user NFTs
-    */
-    mapping(address => uint256[]) public userNFTs;
-
-    /**
-    * @dev mapper for tracking wallet address with deposit transaction 
-    */
-    mapping(address => MintNFT[]) public deposits;
-
+    mapping(uint256 => SellNFT) public pendingSellNFT; 
+   
     /**
     * @dev list of asset
     */
@@ -121,15 +121,15 @@ contract WealthFarming is ERC721URIStorage, AccessControl, Pausable, ReentrancyG
     event DebtAdded(string name, string code, uint256 value, uint256 index);
     event DebtUpdated(uint256 index, uint256 value);
     event NAVUpdated(uint256 newNAV, uint256 timestamp);
-    event MintNFTRequest(address buyer, uint256 amount, uint256 transactionId, uint256 timestamp);
+    event BuyNFTRequest(address buyer, uint256 amount, uint256 transactionId, uint256 timestamp);
     event CancelMintNFT(uint256 transactionId);
-    event NFTMinted(address indexed buyer, uint256 tokenId, uint256 price, uint256 timestamp);
+    event NFTMinted(address indexed buyer, uint256 price, uint256 timestamp);
     event PendingTransactionProcessed(uint256 transactionId, uint256 timestamp, uint256 refund);
     event NFTTransferred(uint256 tokenId, address from, address to, uint256 price);
-    event PendingSaleCreated(uint256 saleId, uint256 tokenId, address seller, address buyer, uint256 price, uint256 timestamp);
-    event PendingSaleProcessed(uint256 saleId, uint256 timestamp);
+    event PendingSellCreated(uint256 sellId, uint256 tokenId, address seller,uint256 timestamp);
+    event PendingSaleProcessed(uint256 sellId, uint256 price, uint256 timestamp);
 
-    constructor()  ERC721("WealthFarming NFT", "WFNFT") {
+    constructor() {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         receiveFee = msg.sender;
     }
@@ -160,8 +160,8 @@ contract WealthFarming is ERC721URIStorage, AccessControl, Pausable, ReentrancyG
                 timestamp: block.timestamp
             }));
         } else {
-            NavHistory memory nav = navHistory[len - 1];
-            require(block.timestamp >= nav.timestamp + 1 days, "CalculateNAV: T+1 condition not met");
+            // NavHistory memory nav = navHistory[len - 1];
+            // require(block.timestamp >= nav.timestamp + 1 days, "CalculateNAV: T+1 condition not met");
 
             navPrice = _navPrice;
 
@@ -181,41 +181,42 @@ contract WealthFarming is ERC721URIStorage, AccessControl, Pausable, ReentrancyG
      * user will deposit to smart contract, this transaction will trigger in end of day
      *
      */
-    function mintNFT(uint256 amount) external whenNotPaused nonReentrant notContract {
+    function buyNFT(uint256 amount) external whenNotPaused nonReentrant notContract {
         
-        require(amount > 0, "MintNFT: Amount must be greater than 0");
-        require(usdcToken.allowance(msg.sender, address(this)) >= amount, "MintNFT: Insufficient allowance");
+        require(amount > 0, "BuyNFT: Amount must be greater than 0");
+        require(usdcToken.allowance(msg.sender, address(this)) >= amount, "BuyNFT: Insufficient allowance");
 
         // transfer to this address
         usdcToken.transferFrom(msg.sender, address(this), amount);
 
         NavHistory memory nav = navHistory[navHistory.length - 1];
 
-        MintNFT memory mintNFTRequest = MintNFT({
-            id: mintNFTCounter,
+        BuyNFT memory buyNFTRequest = BuyNFT({
+            id: buyNFTCounter,
             navId: nav.id,
             buyer: msg.sender,
             amount: amount,
             timestamp: block.timestamp,
-            processed: false
+            processed: false,
+            refund: 0
         });
 
         // Save pending mint nft request to map of transaction counter
-        pendingMintNFTs[mintNFTCounter] = mintNFTRequest;
+        pendingBuyNFT[buyNFTCounter] = buyNFTRequest;
         
         // Save to map of deposit of user
-        deposits[msg.sender].push(mintNFTRequest);
+        mapAddressWithBuyNFT[msg.sender][buyNFTCounter] = buyNFTRequest;
 
-        emit MintNFTRequest(msg.sender, amount, mintNFTCounter, block.timestamp);
-        mintNFTCounter++;
+        emit BuyNFTRequest(msg.sender, amount, buyNFTCounter, block.timestamp);
+        buyNFTCounter++;
     }
 
     /**
      * @dev finalize mint nft
      * @param _transactionId is transaction id of mint nft request
      */
-    function finalizeMint(uint256 _transactionId) external onlyRole(DEFAULT_ADMIN_ROLE)  {
-        MintNFT storage txn = pendingMintNFTs[_transactionId];
+    function finalizeBuyNFT(uint256 _transactionId) external onlyRole(DEFAULT_ADMIN_ROLE)  {
+        BuyNFT storage txn = pendingBuyNFT[_transactionId];
         NavHistory memory nav = navHistory[navHistory.length - 1];
 
         require(txn.navId == nav.id - 1, "FinalizeMint: Transaction not in pool");
@@ -233,12 +234,9 @@ contract WealthFarming is ERC721URIStorage, AccessControl, Pausable, ReentrancyG
 
         // mint nft and transfer to buyer
         for (uint256 i = 0; i < numNFT; i++) {
-            uint256 tokenId = nextTokenId++;
-            _mint(txn.buyer, tokenId);
-            _setTokenURI(tokenId, "");
-            userNFTs[txn.buyer].push(tokenId);
+            nftToken.mint(txn.buyer);
             totalFeeValue = totalFeeValue + fee;
-            emit NFTMinted(txn.buyer, tokenId, navPrice, block.timestamp);
+            emit NFTMinted(txn.buyer, navPrice, block.timestamp);
         }
 
         uint256 refundAmount = txn.amount - ((navPrice + fee) * numNFT);
@@ -246,8 +244,14 @@ contract WealthFarming is ERC721URIStorage, AccessControl, Pausable, ReentrancyG
         // refund usdc to buyer
         usdcToken.transfer(txn.buyer, refundAmount);
 
+        // assign refund amount
+        txn.refund = refundAmount;
+
         // send fee to admin
         usdcToken.transfer(receiveFee, totalFeeValue);
+        
+        // synchonize transaction
+        mapAddressWithBuyNFT[txn.buyer][_transactionId] = txn;
 
         emit PendingTransactionProcessed(_transactionId, block.timestamp, refundAmount);
     }
@@ -257,78 +261,69 @@ contract WealthFarming is ERC721URIStorage, AccessControl, Pausable, ReentrancyG
      * @param _transactionId is transaction id of mint nft request
      */
     function cancelMint(uint256 _transactionId) external whenNotPaused nonReentrant notContract {
-        MintNFT storage txn = pendingMintNFTs[_transactionId];
+        BuyNFT storage txn = pendingBuyNFT[_transactionId];
         require(msg.sender == txn.buyer, "CancelMint: Buyer not match");
         require(!txn.processed, "CancelMint: Transaction already processed");
 
-        txn.processed = true;
-
         // refund usdc to buyer
         usdcToken.transfer(txn.buyer, txn.amount);
+
+        txn.processed = true;
+        txn.refund = txn.amount;
+        
+        // synchonize transaction
+        mapAddressWithBuyNFT[txn.buyer][_transactionId] = txn;
 
         emit CancelMintNFT(_transactionId);
     }
 
     /**
-     * @dev get all deposits of an address
+     * @dev sell nft
+     * @param _tokenId is id of nft
      */
-    function getAllDeposits() external view returns(MintNFT[] memory) {
-        MintNFT[] memory transactions = deposits[msg.sender];
-        return transactions;
-    }
+    function sell(uint256 _tokenId) external whenNotPaused nonReentrant notContract {
+        
+        require(
+            nftToken.ownerOf(_tokenId) == msg.sender,
+            "Account does not own the specified ERC721 token ID"
+        );
 
-    /**
-     * @dev Get Pending Transaction 
-     *
-     */
-    function getPendingTransactions() external view returns (MintNFT[] memory) {
-        MintNFT[] memory transactions = new MintNFT[](mintNFTCounter);
-        for (uint256 i = 0; i < mintNFTCounter; i++) {
-            transactions[i] = pendingMintNFTs[i];
-        }
-        return transactions;
-    }
+        nftToken.safeTransferFrom(msg.sender, address(this), _tokenId);
 
-    function sellNFT(uint256 tokenId, address to, uint256 price) external whenNotPaused {
-        require(ownerOf(tokenId) == msg.sender, "You do not own this token");
-
-        // Tạo giao dịch bán pending
-        pendingSales[saleCounter] = PendingSale({
+        SellNFT memory sellNFTRequest = SellNFT({
+            id: sellNFTCounter,
+            price: 0,
             seller: msg.sender,
-            buyer: to,
-            tokenId: tokenId,
-            price: price,
+            buyer: address(this),
+            tokenId: _tokenId,
             timestamp: block.timestamp,
             processed: false
         });
 
-        saleCounter++;
-        emit PendingSaleCreated(saleCounter - 1, tokenId, msg.sender, to, price, block.timestamp);
+        pendingSellNFT[sellNFTCounter] = sellNFTRequest;
+
+        emit PendingSellCreated(
+            sellNFTCounter, 
+            _tokenId, 
+            msg.sender,
+            block.timestamp
+        );
+        
+        sellNFTCounter++;
     }
 
-    function finalizeSale(uint256 saleId) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        PendingSale storage sale = pendingSales[saleId];
-        require(!sale.processed, "Sale already processed");
-        require(block.timestamp >= sale.timestamp + 1 days, "T+1 condition not met");
+    /**
+     * @dev get all buy request of an address
+     */
+    function getAllBuyRequest() external view returns(BuyNFT[] memory) {
+        BuyNFT[] memory transactions = new BuyNFT[](buyRequestIdOfAddress[msg.sender].length);
+        uint256[] memory listId = buyRequestIdOfAddress[msg.sender];
 
-        sale.processed = true;
-
-        // Chuyển quyền sở hữu NFT
-        _transfer(sale.seller, sale.buyer, sale.tokenId);
-
-        // Chuyển USDC từ người mua sang người bán
-        require(usdcToken.transferFrom(sale.buyer, sale.seller, sale.price), "USDC transfer failed");
-
-        emit PendingSaleProcessed(saleId, block.timestamp);
-        emit NFTTransferred(sale.tokenId, sale.seller, sale.buyer, sale.price);
-    }
-
-    function getPendingSales() external view returns (PendingSale[] memory) {
-        PendingSale[] memory sales = new PendingSale[](saleCounter);
-        for (uint256 i = 0; i < saleCounter; i++) {
-            sales[i] = pendingSales[i];
+        for (uint8 i = 0; i < listId.length;i++) {
+            transactions[i] = pendingBuyNFT[listId[i]];
         }
-        return sales;
+        
+        return transactions;
     }
 
     function pause() external onlyRole(DEFAULT_ADMIN_ROLE) {
@@ -339,18 +334,6 @@ contract WealthFarming is ERC721URIStorage, AccessControl, Pausable, ReentrancyG
         _unpause();
     }
 
-
-    function getTokenOwner(uint256 tokenId) external view returns (address) {
-        return ownerOf(tokenId);
-    }
-
-    function getUserNFTs(address user) external view returns (uint256[] memory) {
-        return userNFTs[user];
-    }
-
-    function getMarketplaceListings() external view returns (uint256[] memory) {
-    
-    }
 
     /**
      * @dev Sweeps tokens from the contract to the admin's address.
@@ -368,16 +351,7 @@ contract WealthFarming is ERC721URIStorage, AccessControl, Pausable, ReentrancyG
         }
     }
 
-     // Override required by Solidity
-    function supportsInterface(bytes4 interfaceId)
-        public
-        view
-        override(ERC721URIStorage, AccessControl)
-        returns (bool)
-    {
-        return super.supportsInterface(interfaceId);
-    }
-
+   
     function isContract(address account) internal view returns (bool) {
         // This method relies on extcodesize, which returns 0 for contracts in
         // construction, since the code is only stored at the end of the

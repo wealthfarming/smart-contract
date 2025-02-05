@@ -45,7 +45,7 @@ contract WealthFarming is AccessControl, Pausable, ReentrancyGuard{
      */
     IERC20 public usdcToken = IERC20(0xF62B3a6571E0A05E60663D39EB961e0e1814219d);
 
-    IBEQNFT public nftToken = IBEQNFT(0x742C882b0B82Bc75Dc07c526c0DEE3f92a3Bef18);
+    IBEQNFT public nftToken = IBEQNFT(0x3836544E4F7A3F47C7441bcba003C22ACA0AAa93);
 
     /**
      * @dev decimal of token USDC
@@ -75,7 +75,31 @@ contract WealthFarming is AccessControl, Pausable, ReentrancyGuard{
     /**
      * @dev Factor used for calculating discounts, where 10000 represents 100%.
      */
-    uint256 public constant DISCOUNT_FACTOR = 10000;
+    uint256 public constant FEE_FACTOR = 10000;
+
+    /**
+     * @dev ceil percent, this will be used to calcuate nft price, reduce excessive price increases
+     * 70 - 7%
+     */
+    uint256 public ceil = 70;
+
+    /**
+     * @dev ceil percent, this will be used to calcuate nft price, reduce excessive price increases
+     * 70 - 7%
+     */
+    uint256 public constant CEIL_FACTOR = 1000;
+
+    /**
+     * @dev floor percent, this will be used to calcuate nft price, reduce excessive price decrease
+     * 70 - 7%
+     */
+    uint256 public floor = 70;
+
+    /**
+     * @dev ceil percent, this will be used to calcuate nft price, reduce excessive price increases
+     * 70 - 7%
+     */
+    uint256 public constant FLOOR_FACTOR = 1000;
 
     /**
      * @dev Address of receive fee trade
@@ -110,7 +134,12 @@ contract WealthFarming is AccessControl, Pausable, ReentrancyGuard{
     /**
     * @dev nav price
     */
-    uint256 navPrice;
+    uint256 public navPrice;
+
+    /**
+    * @dev nav price
+    */
+    uint256[] private lockNFT;
 
     /**
      * @dev Address representing the native token, e.g., Ether (ETH) on Ethereum.
@@ -147,33 +176,46 @@ contract WealthFarming is AccessControl, Pausable, ReentrancyGuard{
      * @param _winRate is win rate
      * @param _risk is risk 
      */
-    function calculateNAV(uint256 _navPrice, uint256 _winRate, uint256 _risk) external onlyRole(DEFAULT_ADMIN_ROLE)  {
+    function calculateNFTPrice(uint256 _navPrice, uint256 _winRate, uint256 _risk) external onlyRole(DEFAULT_ADMIN_ROLE)  {
+        require(_navPrice > 0, "calculateNFTPrice: NAV Price must greater than 0");
+
         navCounter++;
-        uint256 len = navHistory.length;
-        if (len == 0) {
-            navPrice = _navPrice;
+        uint256 totalNFT = nftToken.getNextTokenId();
+        uint256 currentPrice = _navPrice / totalNFT;
 
-            navHistory.push(NavHistory({
-                id: navCounter,
-                price: _navPrice,
-                winRate: _winRate,
-                risk: _risk,
-                timestamp: block.timestamp
-            }));
-        } else {
-            // NavHistory memory nav = navHistory[len - 1];
-            // require(block.timestamp >= nav.timestamp + 1 days, "CalculateNAV: T+1 condition not met");
+        if (navHistory.length > 0) {
+            NavHistory memory nav = navHistory[navHistory.length - 1];
 
-            navPrice = _navPrice;
+            uint256 lastPrice = nav.price;
 
-            navHistory.push(NavHistory({
-                id: navCounter,
-                price: _navPrice,
-                winRate: _winRate,
-                risk: _risk,
-                timestamp: block.timestamp
-            }));
+            if (currentPrice > lastPrice) {
+                uint256 delta = currentPrice - lastPrice;
+                uint256 maxDelta = lastPrice * ceil / CEIL_FACTOR;
+
+                if (delta > maxDelta) {
+                    currentPrice = lastPrice + maxDelta;
+                } else {
+                    currentPrice = lastPrice + delta;
+                }
+            } else if (lastPrice > currentPrice) {
+                uint256 delta = lastPrice - currentPrice;
+                uint256 maxDelta = lastPrice * floor / FLOOR_FACTOR;
+
+                if (delta > maxDelta) {
+                    currentPrice = lastPrice - maxDelta;
+                } else {
+                    currentPrice = lastPrice - delta;
+                }
+            }
         }
+
+        navHistory.push(NavHistory({
+            id: navCounter,
+            price: currentPrice,
+            winRate: _winRate,
+            risk: _risk,
+            timestamp: block.timestamp
+        }));
     }
 
     /**
@@ -229,12 +271,26 @@ contract WealthFarming is AccessControl, Pausable, ReentrancyGuard{
         txn.processed = true;
 
         // calculate fee per nav price
-        uint256 fee = navPrice * baseFee / DISCOUNT_FACTOR;
+        uint256 fee = navPrice * baseFee / FEE_FACTOR;
 
         // find number of NFT to mint
         uint256 numNFT = txn.amount / (navPrice + fee);
-        
+        uint256 baseNumNFT = numNFT;
         uint256 totalFeeValue = 0;
+
+        // transfer NFT to buyer
+        for (uint256 i = lockNFT.length - 1; i >= 0; i--) {
+            if (numNFT == 0) {
+                break;
+            }
+
+            uint256 tokenId = lockNFT[i];
+            nftToken.transferFrom(address(this), txn.buyer, tokenId);
+            emit NFTMinted(txn.buyer, navPrice, block.timestamp);
+
+            lockNFT.pop();
+            numNFT--;
+        }
 
         // mint nft and transfer to buyer
         for (uint256 i = 0; i < numNFT; i++) {
@@ -242,8 +298,8 @@ contract WealthFarming is AccessControl, Pausable, ReentrancyGuard{
             totalFeeValue = totalFeeValue + fee;
             emit NFTMinted(txn.buyer, navPrice, block.timestamp);
         }
-
-        uint256 refundAmount = txn.amount - ((navPrice + fee) * numNFT);
+        
+        uint256 refundAmount = txn.amount - ((navPrice + fee) * baseNumNFT);
 
         // refund usdc to buyer
         usdcToken.transfer(txn.buyer, refundAmount);
@@ -265,7 +321,7 @@ contract WealthFarming is AccessControl, Pausable, ReentrancyGuard{
      * @dev cancel mint nft
      * @param _transactionId is transaction id of mint nft request
      */
-    function cancelBuy(uint256 _transactionId) external whenNotPaused nonReentrant notContract {
+    function cancelBuyNFT(uint256 _transactionId) external whenNotPaused nonReentrant notContract {
         BuyNFT storage txn = pendingBuyNFT[_transactionId];
         require(msg.sender == txn.buyer, "cancelBuy: Buyer not match");
         require(!txn.processed, "cancelBuy: Transaction already processed");
@@ -283,7 +339,7 @@ contract WealthFarming is AccessControl, Pausable, ReentrancyGuard{
      * @dev sell nft
      * @param _tokenId is id of nft
      */
-    function sell(uint256 _tokenId) external whenNotPaused nonReentrant notContract {
+    function sellNFT(uint256 _tokenId) external whenNotPaused nonReentrant notContract {
         
         require(
             nftToken.ownerOf(_tokenId) == msg.sender,
@@ -306,7 +362,7 @@ contract WealthFarming is AccessControl, Pausable, ReentrancyGuard{
         });
 
         // Transfer nft from owner to marker contract
-        nftToken.safeTransferFrom(msg.sender, address(this), _tokenId);
+        nftToken.transferFrom(msg.sender, address(this), _tokenId);
 
         sellRequestIdOfAddress[msg.sender].push(sellNFTCounter);
 
@@ -336,13 +392,16 @@ contract WealthFarming is AccessControl, Pausable, ReentrancyGuard{
         txn.processed = true;
 
         // calculate fee per nav price
-        uint256 fee = navPrice * baseFee / DISCOUNT_FACTOR;
+        uint256 fee = navPrice * baseFee / FEE_FACTOR;
 
         // refund usdc to buyer
         usdcToken.transfer(txn.buyer, navPrice - fee);
 
         // send fee to admin
         usdcToken.transfer(receiveFee, fee);
+
+        // update lock nft 
+        lockNFT.push(txn.tokenId);
 
         emit PendingSellNFTProcessed(_sellId, txn.tokenId, block.timestamp);
     }
@@ -351,13 +410,13 @@ contract WealthFarming is AccessControl, Pausable, ReentrancyGuard{
      * @dev cancel sell nft
      * @param _sellId is id sell request
      */
-    function cancelSell(uint256 _sellId) external whenNotPaused nonReentrant notContract {
+    function cancelSellNFT(uint256 _sellId) external whenNotPaused nonReentrant notContract {
         SellNFT storage txn = pendingSellNFT[_sellId];
         require(msg.sender == txn.seller, "CancelSell: Buyer not match");
         require(!txn.processed, "CancelSell: Transaction already processed");
 
         // refund usdc to buyer
-        nftToken.safeTransferFrom(address(this), txn.seller, txn.tokenId);
+        nftToken.transferFrom(address(this), txn.seller, txn.tokenId);
 
         txn.processed = true;
 

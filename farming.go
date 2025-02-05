@@ -54,7 +54,7 @@ type WealthFarmingSellNFT struct {
 
 // FarmingMetaData contains all meta data concerning the Farming contract.
 var FarmingMetaData = &bind.MetaData{
-	ABI: "[{\"inputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"inputs\":[],\"name\":\"AccessControlBadConfirmation\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"internalType\":\"bytes32\",\"name\":\"neededRole\",\"type\":\"bytes32\"}],\"name\":\"AccessControlUnauthorizedAccount\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"EnforcedPause\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"ExpectedPause\",\"type\":\"error\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"string\",\"name\":\"name\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"code\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"value\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"index\",\"type\":\"uint256\"}],\"name\":\"AssetAdded\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"index\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"value\",\"type\":\"uint256\"}],\"name\":\"AssetUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"buyer\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"transactionId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"timestamp\",\"type\":\"uint256\"}],\"name\":\"BuyNFTRequest\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"transactionId\",\"type\":\"uint256\"}],\"name\":\"CancelBuyNFT\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"transactionId\",\"type\":\"uint256\"}],\"name\":\"CancelSellNFT\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"string\",\"name\":\"name\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"code\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"value\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"index\",\"type\":\"uint256\"}],\"name\":\"DebtAdded\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"index\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"value\",\"type\":\"uint256\"}],\"name\":\"DebtUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"newEditor\",\"type\":\"address\"}],\"name\":\"EditorUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"newNAV\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"timestamp\",\"type\":\"uint256\"}],\"name\":\"NAVUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"buyer\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"price\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"timestamp\",\"type\":\"uint256\"}],\"name\":\"NFTMinted\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"Paused\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"transactionId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"timestamp\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"refund\",\"type\":\"uint256\"}],\"name\":\"PendingBuyNFTProcessed\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"sellId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"seller\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"timestamp\",\"type\":\"uint256\"}],\"name\":\"PendingSellCreated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"sellId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"timestamp\",\"type\":\"uint256\"}],\"name\":\"PendingSellNFTProcessed\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"previousAdminRole\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"newAdminRole\",\"type\":\"bytes32\"}],\"name\":\"RoleAdminChanged\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"}],\"name\":\"RoleGranted\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"}],\"name\":\"RoleRevoked\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"Unpaused\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"DEFAULT_ADMIN_ROLE\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"DISCOUNT_FACTOR\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"NATIVE_TOKEN_ADDRESS\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"baseFee\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"buyNFT\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"buyNFTCounter\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_navPrice\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_winRate\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_risk\",\"type\":\"uint256\"}],\"name\":\"calculateNAV\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_transactionId\",\"type\":\"uint256\"}],\"name\":\"cancelBuy\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_sellId\",\"type\":\"uint256\"}],\"name\":\"cancelSell\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_transactionId\",\"type\":\"uint256\"}],\"name\":\"finalizeBuyNFT\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_sellId\",\"type\":\"uint256\"}],\"name\":\"finalizeSellNFT\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getAllBuyRequest\",\"outputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"navId\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"buyer\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"refund\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"timestamp\",\"type\":\"uint256\"},{\"internalType\":\"bool\",\"name\":\"processed\",\"type\":\"bool\"}],\"internalType\":\"structWealthFarming.BuyNFT[]\",\"name\":\"\",\"type\":\"tuple[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getAllSellRequest\",\"outputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"navId\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"seller\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"buyer\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"price\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"timestamp\",\"type\":\"uint256\"},{\"internalType\":\"bool\",\"name\":\"processed\",\"type\":\"bool\"}],\"internalType\":\"structWealthFarming.SellNFT[]\",\"name\":\"\",\"type\":\"tuple[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"}],\"name\":\"getRoleAdmin\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"grantRole\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"hasRole\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"navCounter\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"navHistory\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"price\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"winRate\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"risk\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"timestamp\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"nftToken\",\"outputs\":[{\"internalType\":\"contractIBEQNFT\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"pause\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"paused\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"callerConfirmation\",\"type\":\"address\"}],\"name\":\"renounceRole\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"revokeRole\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_tokenId\",\"type\":\"uint256\"}],\"name\":\"sell\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"sellNFTCounter\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"interfaceId\",\"type\":\"bytes4\"}],\"name\":\"supportsInterface\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_token\",\"type\":\"address\"}],\"name\":\"sweepToken\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"unpause\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"usdcDecimal\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"usdcToken\",\"outputs\":[{\"internalType\":\"contractIERC20\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"}]",
+	ABI: "[{\"inputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"inputs\":[],\"name\":\"AccessControlBadConfirmation\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"internalType\":\"bytes32\",\"name\":\"neededRole\",\"type\":\"bytes32\"}],\"name\":\"AccessControlUnauthorizedAccount\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"EnforcedPause\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"ExpectedPause\",\"type\":\"error\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"string\",\"name\":\"name\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"code\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"value\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"index\",\"type\":\"uint256\"}],\"name\":\"AssetAdded\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"index\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"value\",\"type\":\"uint256\"}],\"name\":\"AssetUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"buyer\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"transactionId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"timestamp\",\"type\":\"uint256\"}],\"name\":\"BuyNFTRequest\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"transactionId\",\"type\":\"uint256\"}],\"name\":\"CancelBuyNFT\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"transactionId\",\"type\":\"uint256\"}],\"name\":\"CancelSellNFT\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"string\",\"name\":\"name\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"code\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"value\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"index\",\"type\":\"uint256\"}],\"name\":\"DebtAdded\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"index\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"value\",\"type\":\"uint256\"}],\"name\":\"DebtUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"newEditor\",\"type\":\"address\"}],\"name\":\"EditorUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"newNAV\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"timestamp\",\"type\":\"uint256\"}],\"name\":\"NAVUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"buyer\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"price\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"timestamp\",\"type\":\"uint256\"}],\"name\":\"NFTMinted\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"Paused\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"transactionId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"timestamp\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"refund\",\"type\":\"uint256\"}],\"name\":\"PendingBuyNFTProcessed\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"sellId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"seller\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"timestamp\",\"type\":\"uint256\"}],\"name\":\"PendingSellCreated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"sellId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"timestamp\",\"type\":\"uint256\"}],\"name\":\"PendingSellNFTProcessed\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"previousAdminRole\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"newAdminRole\",\"type\":\"bytes32\"}],\"name\":\"RoleAdminChanged\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"}],\"name\":\"RoleGranted\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"}],\"name\":\"RoleRevoked\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"Unpaused\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"CEIL_FACTOR\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"DEFAULT_ADMIN_ROLE\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"FEE_FACTOR\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"FLOOR_FACTOR\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"NATIVE_TOKEN_ADDRESS\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"baseFee\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"buyNFT\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"buyNFTCounter\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_navPrice\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_winRate\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_risk\",\"type\":\"uint256\"}],\"name\":\"calculateNFTPrice\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_transactionId\",\"type\":\"uint256\"}],\"name\":\"cancelBuyNFT\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_sellId\",\"type\":\"uint256\"}],\"name\":\"cancelSellNFT\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"ceil\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_transactionId\",\"type\":\"uint256\"}],\"name\":\"finalizeBuyNFT\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_sellId\",\"type\":\"uint256\"}],\"name\":\"finalizeSellNFT\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"floor\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getAllBuyRequest\",\"outputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"navId\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"buyer\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"refund\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"timestamp\",\"type\":\"uint256\"},{\"internalType\":\"bool\",\"name\":\"processed\",\"type\":\"bool\"}],\"internalType\":\"structWealthFarming.BuyNFT[]\",\"name\":\"\",\"type\":\"tuple[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getAllSellRequest\",\"outputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"navId\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"seller\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"buyer\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"price\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"timestamp\",\"type\":\"uint256\"},{\"internalType\":\"bool\",\"name\":\"processed\",\"type\":\"bool\"}],\"internalType\":\"structWealthFarming.SellNFT[]\",\"name\":\"\",\"type\":\"tuple[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"}],\"name\":\"getRoleAdmin\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"grantRole\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"hasRole\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"navCounter\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"navHistory\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"price\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"winRate\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"risk\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"timestamp\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"navPrice\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"nftToken\",\"outputs\":[{\"internalType\":\"contractIBEQNFT\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"pause\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"paused\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"callerConfirmation\",\"type\":\"address\"}],\"name\":\"renounceRole\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"revokeRole\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_tokenId\",\"type\":\"uint256\"}],\"name\":\"sellNFT\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"sellNFTCounter\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"interfaceId\",\"type\":\"bytes4\"}],\"name\":\"supportsInterface\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_token\",\"type\":\"address\"}],\"name\":\"sweepToken\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"unpause\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"usdcDecimal\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"usdcToken\",\"outputs\":[{\"internalType\":\"contractIERC20\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"}]",
 }
 
 // FarmingABI is the input ABI used to generate the binding from.
@@ -203,6 +203,37 @@ func (_Farming *FarmingTransactorRaw) Transact(opts *bind.TransactOpts, method s
 	return _Farming.Contract.contract.Transact(opts, method, params...)
 }
 
+// CEILFACTOR is a free data retrieval call binding the contract method 0xb8f08248.
+//
+// Solidity: function CEIL_FACTOR() view returns(uint256)
+func (_Farming *FarmingCaller) CEILFACTOR(opts *bind.CallOpts) (*big.Int, error) {
+	var out []interface{}
+	err := _Farming.contract.Call(opts, &out, "CEIL_FACTOR")
+
+	if err != nil {
+		return *new(*big.Int), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(*big.Int)).(**big.Int)
+
+	return out0, err
+
+}
+
+// CEILFACTOR is a free data retrieval call binding the contract method 0xb8f08248.
+//
+// Solidity: function CEIL_FACTOR() view returns(uint256)
+func (_Farming *FarmingSession) CEILFACTOR() (*big.Int, error) {
+	return _Farming.Contract.CEILFACTOR(&_Farming.CallOpts)
+}
+
+// CEILFACTOR is a free data retrieval call binding the contract method 0xb8f08248.
+//
+// Solidity: function CEIL_FACTOR() view returns(uint256)
+func (_Farming *FarmingCallerSession) CEILFACTOR() (*big.Int, error) {
+	return _Farming.Contract.CEILFACTOR(&_Farming.CallOpts)
+}
+
 // DEFAULTADMINROLE is a free data retrieval call binding the contract method 0xa217fddf.
 //
 // Solidity: function DEFAULT_ADMIN_ROLE() view returns(bytes32)
@@ -234,12 +265,12 @@ func (_Farming *FarmingCallerSession) DEFAULTADMINROLE() ([32]byte, error) {
 	return _Farming.Contract.DEFAULTADMINROLE(&_Farming.CallOpts)
 }
 
-// DISCOUNTFACTOR is a free data retrieval call binding the contract method 0x2f002846.
+// FEEFACTOR is a free data retrieval call binding the contract method 0x5afbc4a8.
 //
-// Solidity: function DISCOUNT_FACTOR() view returns(uint256)
-func (_Farming *FarmingCaller) DISCOUNTFACTOR(opts *bind.CallOpts) (*big.Int, error) {
+// Solidity: function FEE_FACTOR() view returns(uint256)
+func (_Farming *FarmingCaller) FEEFACTOR(opts *bind.CallOpts) (*big.Int, error) {
 	var out []interface{}
-	err := _Farming.contract.Call(opts, &out, "DISCOUNT_FACTOR")
+	err := _Farming.contract.Call(opts, &out, "FEE_FACTOR")
 
 	if err != nil {
 		return *new(*big.Int), err
@@ -251,18 +282,49 @@ func (_Farming *FarmingCaller) DISCOUNTFACTOR(opts *bind.CallOpts) (*big.Int, er
 
 }
 
-// DISCOUNTFACTOR is a free data retrieval call binding the contract method 0x2f002846.
+// FEEFACTOR is a free data retrieval call binding the contract method 0x5afbc4a8.
 //
-// Solidity: function DISCOUNT_FACTOR() view returns(uint256)
-func (_Farming *FarmingSession) DISCOUNTFACTOR() (*big.Int, error) {
-	return _Farming.Contract.DISCOUNTFACTOR(&_Farming.CallOpts)
+// Solidity: function FEE_FACTOR() view returns(uint256)
+func (_Farming *FarmingSession) FEEFACTOR() (*big.Int, error) {
+	return _Farming.Contract.FEEFACTOR(&_Farming.CallOpts)
 }
 
-// DISCOUNTFACTOR is a free data retrieval call binding the contract method 0x2f002846.
+// FEEFACTOR is a free data retrieval call binding the contract method 0x5afbc4a8.
 //
-// Solidity: function DISCOUNT_FACTOR() view returns(uint256)
-func (_Farming *FarmingCallerSession) DISCOUNTFACTOR() (*big.Int, error) {
-	return _Farming.Contract.DISCOUNTFACTOR(&_Farming.CallOpts)
+// Solidity: function FEE_FACTOR() view returns(uint256)
+func (_Farming *FarmingCallerSession) FEEFACTOR() (*big.Int, error) {
+	return _Farming.Contract.FEEFACTOR(&_Farming.CallOpts)
+}
+
+// FLOORFACTOR is a free data retrieval call binding the contract method 0x78908bd9.
+//
+// Solidity: function FLOOR_FACTOR() view returns(uint256)
+func (_Farming *FarmingCaller) FLOORFACTOR(opts *bind.CallOpts) (*big.Int, error) {
+	var out []interface{}
+	err := _Farming.contract.Call(opts, &out, "FLOOR_FACTOR")
+
+	if err != nil {
+		return *new(*big.Int), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(*big.Int)).(**big.Int)
+
+	return out0, err
+
+}
+
+// FLOORFACTOR is a free data retrieval call binding the contract method 0x78908bd9.
+//
+// Solidity: function FLOOR_FACTOR() view returns(uint256)
+func (_Farming *FarmingSession) FLOORFACTOR() (*big.Int, error) {
+	return _Farming.Contract.FLOORFACTOR(&_Farming.CallOpts)
+}
+
+// FLOORFACTOR is a free data retrieval call binding the contract method 0x78908bd9.
+//
+// Solidity: function FLOOR_FACTOR() view returns(uint256)
+func (_Farming *FarmingCallerSession) FLOORFACTOR() (*big.Int, error) {
+	return _Farming.Contract.FLOORFACTOR(&_Farming.CallOpts)
 }
 
 // NATIVETOKENADDRESS is a free data retrieval call binding the contract method 0xdf2ebdbb.
@@ -356,6 +418,68 @@ func (_Farming *FarmingSession) BuyNFTCounter() (*big.Int, error) {
 // Solidity: function buyNFTCounter() view returns(uint256)
 func (_Farming *FarmingCallerSession) BuyNFTCounter() (*big.Int, error) {
 	return _Farming.Contract.BuyNFTCounter(&_Farming.CallOpts)
+}
+
+// Ceil is a free data retrieval call binding the contract method 0x5ed03e57.
+//
+// Solidity: function ceil() view returns(uint256)
+func (_Farming *FarmingCaller) Ceil(opts *bind.CallOpts) (*big.Int, error) {
+	var out []interface{}
+	err := _Farming.contract.Call(opts, &out, "ceil")
+
+	if err != nil {
+		return *new(*big.Int), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(*big.Int)).(**big.Int)
+
+	return out0, err
+
+}
+
+// Ceil is a free data retrieval call binding the contract method 0x5ed03e57.
+//
+// Solidity: function ceil() view returns(uint256)
+func (_Farming *FarmingSession) Ceil() (*big.Int, error) {
+	return _Farming.Contract.Ceil(&_Farming.CallOpts)
+}
+
+// Ceil is a free data retrieval call binding the contract method 0x5ed03e57.
+//
+// Solidity: function ceil() view returns(uint256)
+func (_Farming *FarmingCallerSession) Ceil() (*big.Int, error) {
+	return _Farming.Contract.Ceil(&_Farming.CallOpts)
+}
+
+// Floor is a free data retrieval call binding the contract method 0x40695363.
+//
+// Solidity: function floor() view returns(uint256)
+func (_Farming *FarmingCaller) Floor(opts *bind.CallOpts) (*big.Int, error) {
+	var out []interface{}
+	err := _Farming.contract.Call(opts, &out, "floor")
+
+	if err != nil {
+		return *new(*big.Int), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(*big.Int)).(**big.Int)
+
+	return out0, err
+
+}
+
+// Floor is a free data retrieval call binding the contract method 0x40695363.
+//
+// Solidity: function floor() view returns(uint256)
+func (_Farming *FarmingSession) Floor() (*big.Int, error) {
+	return _Farming.Contract.Floor(&_Farming.CallOpts)
+}
+
+// Floor is a free data retrieval call binding the contract method 0x40695363.
+//
+// Solidity: function floor() view returns(uint256)
+func (_Farming *FarmingCallerSession) Floor() (*big.Int, error) {
+	return _Farming.Contract.Floor(&_Farming.CallOpts)
 }
 
 // GetAllBuyRequest is a free data retrieval call binding the contract method 0xde0ebfa3.
@@ -573,6 +697,37 @@ func (_Farming *FarmingCallerSession) NavHistory(arg0 *big.Int) (struct {
 	return _Farming.Contract.NavHistory(&_Farming.CallOpts, arg0)
 }
 
+// NavPrice is a free data retrieval call binding the contract method 0xb3982cb8.
+//
+// Solidity: function navPrice() view returns(uint256)
+func (_Farming *FarmingCaller) NavPrice(opts *bind.CallOpts) (*big.Int, error) {
+	var out []interface{}
+	err := _Farming.contract.Call(opts, &out, "navPrice")
+
+	if err != nil {
+		return *new(*big.Int), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(*big.Int)).(**big.Int)
+
+	return out0, err
+
+}
+
+// NavPrice is a free data retrieval call binding the contract method 0xb3982cb8.
+//
+// Solidity: function navPrice() view returns(uint256)
+func (_Farming *FarmingSession) NavPrice() (*big.Int, error) {
+	return _Farming.Contract.NavPrice(&_Farming.CallOpts)
+}
+
+// NavPrice is a free data retrieval call binding the contract method 0xb3982cb8.
+//
+// Solidity: function navPrice() view returns(uint256)
+func (_Farming *FarmingCallerSession) NavPrice() (*big.Int, error) {
+	return _Farming.Contract.NavPrice(&_Farming.CallOpts)
+}
+
 // NftToken is a free data retrieval call binding the contract method 0xd06fcba8.
 //
 // Solidity: function nftToken() view returns(address)
@@ -780,67 +935,67 @@ func (_Farming *FarmingTransactorSession) BuyNFT(amount *big.Int) (*types.Transa
 	return _Farming.Contract.BuyNFT(&_Farming.TransactOpts, amount)
 }
 
-// CalculateNAV is a paid mutator transaction binding the contract method 0x89690cb3.
+// CalculateNFTPrice is a paid mutator transaction binding the contract method 0x25af38d9.
 //
-// Solidity: function calculateNAV(uint256 _navPrice, uint256 _winRate, uint256 _risk) returns()
-func (_Farming *FarmingTransactor) CalculateNAV(opts *bind.TransactOpts, _navPrice *big.Int, _winRate *big.Int, _risk *big.Int) (*types.Transaction, error) {
-	return _Farming.contract.Transact(opts, "calculateNAV", _navPrice, _winRate, _risk)
+// Solidity: function calculateNFTPrice(uint256 _navPrice, uint256 _winRate, uint256 _risk) returns()
+func (_Farming *FarmingTransactor) CalculateNFTPrice(opts *bind.TransactOpts, _navPrice *big.Int, _winRate *big.Int, _risk *big.Int) (*types.Transaction, error) {
+	return _Farming.contract.Transact(opts, "calculateNFTPrice", _navPrice, _winRate, _risk)
 }
 
-// CalculateNAV is a paid mutator transaction binding the contract method 0x89690cb3.
+// CalculateNFTPrice is a paid mutator transaction binding the contract method 0x25af38d9.
 //
-// Solidity: function calculateNAV(uint256 _navPrice, uint256 _winRate, uint256 _risk) returns()
-func (_Farming *FarmingSession) CalculateNAV(_navPrice *big.Int, _winRate *big.Int, _risk *big.Int) (*types.Transaction, error) {
-	return _Farming.Contract.CalculateNAV(&_Farming.TransactOpts, _navPrice, _winRate, _risk)
+// Solidity: function calculateNFTPrice(uint256 _navPrice, uint256 _winRate, uint256 _risk) returns()
+func (_Farming *FarmingSession) CalculateNFTPrice(_navPrice *big.Int, _winRate *big.Int, _risk *big.Int) (*types.Transaction, error) {
+	return _Farming.Contract.CalculateNFTPrice(&_Farming.TransactOpts, _navPrice, _winRate, _risk)
 }
 
-// CalculateNAV is a paid mutator transaction binding the contract method 0x89690cb3.
+// CalculateNFTPrice is a paid mutator transaction binding the contract method 0x25af38d9.
 //
-// Solidity: function calculateNAV(uint256 _navPrice, uint256 _winRate, uint256 _risk) returns()
-func (_Farming *FarmingTransactorSession) CalculateNAV(_navPrice *big.Int, _winRate *big.Int, _risk *big.Int) (*types.Transaction, error) {
-	return _Farming.Contract.CalculateNAV(&_Farming.TransactOpts, _navPrice, _winRate, _risk)
+// Solidity: function calculateNFTPrice(uint256 _navPrice, uint256 _winRate, uint256 _risk) returns()
+func (_Farming *FarmingTransactorSession) CalculateNFTPrice(_navPrice *big.Int, _winRate *big.Int, _risk *big.Int) (*types.Transaction, error) {
+	return _Farming.Contract.CalculateNFTPrice(&_Farming.TransactOpts, _navPrice, _winRate, _risk)
 }
 
-// CancelBuy is a paid mutator transaction binding the contract method 0x19df99a8.
+// CancelBuyNFT is a paid mutator transaction binding the contract method 0xb9902bc1.
 //
-// Solidity: function cancelBuy(uint256 _transactionId) returns()
-func (_Farming *FarmingTransactor) CancelBuy(opts *bind.TransactOpts, _transactionId *big.Int) (*types.Transaction, error) {
-	return _Farming.contract.Transact(opts, "cancelBuy", _transactionId)
+// Solidity: function cancelBuyNFT(uint256 _transactionId) returns()
+func (_Farming *FarmingTransactor) CancelBuyNFT(opts *bind.TransactOpts, _transactionId *big.Int) (*types.Transaction, error) {
+	return _Farming.contract.Transact(opts, "cancelBuyNFT", _transactionId)
 }
 
-// CancelBuy is a paid mutator transaction binding the contract method 0x19df99a8.
+// CancelBuyNFT is a paid mutator transaction binding the contract method 0xb9902bc1.
 //
-// Solidity: function cancelBuy(uint256 _transactionId) returns()
-func (_Farming *FarmingSession) CancelBuy(_transactionId *big.Int) (*types.Transaction, error) {
-	return _Farming.Contract.CancelBuy(&_Farming.TransactOpts, _transactionId)
+// Solidity: function cancelBuyNFT(uint256 _transactionId) returns()
+func (_Farming *FarmingSession) CancelBuyNFT(_transactionId *big.Int) (*types.Transaction, error) {
+	return _Farming.Contract.CancelBuyNFT(&_Farming.TransactOpts, _transactionId)
 }
 
-// CancelBuy is a paid mutator transaction binding the contract method 0x19df99a8.
+// CancelBuyNFT is a paid mutator transaction binding the contract method 0xb9902bc1.
 //
-// Solidity: function cancelBuy(uint256 _transactionId) returns()
-func (_Farming *FarmingTransactorSession) CancelBuy(_transactionId *big.Int) (*types.Transaction, error) {
-	return _Farming.Contract.CancelBuy(&_Farming.TransactOpts, _transactionId)
+// Solidity: function cancelBuyNFT(uint256 _transactionId) returns()
+func (_Farming *FarmingTransactorSession) CancelBuyNFT(_transactionId *big.Int) (*types.Transaction, error) {
+	return _Farming.Contract.CancelBuyNFT(&_Farming.TransactOpts, _transactionId)
 }
 
-// CancelSell is a paid mutator transaction binding the contract method 0x07c9cd45.
+// CancelSellNFT is a paid mutator transaction binding the contract method 0xacd3db01.
 //
-// Solidity: function cancelSell(uint256 _sellId) returns()
-func (_Farming *FarmingTransactor) CancelSell(opts *bind.TransactOpts, _sellId *big.Int) (*types.Transaction, error) {
-	return _Farming.contract.Transact(opts, "cancelSell", _sellId)
+// Solidity: function cancelSellNFT(uint256 _sellId) returns()
+func (_Farming *FarmingTransactor) CancelSellNFT(opts *bind.TransactOpts, _sellId *big.Int) (*types.Transaction, error) {
+	return _Farming.contract.Transact(opts, "cancelSellNFT", _sellId)
 }
 
-// CancelSell is a paid mutator transaction binding the contract method 0x07c9cd45.
+// CancelSellNFT is a paid mutator transaction binding the contract method 0xacd3db01.
 //
-// Solidity: function cancelSell(uint256 _sellId) returns()
-func (_Farming *FarmingSession) CancelSell(_sellId *big.Int) (*types.Transaction, error) {
-	return _Farming.Contract.CancelSell(&_Farming.TransactOpts, _sellId)
+// Solidity: function cancelSellNFT(uint256 _sellId) returns()
+func (_Farming *FarmingSession) CancelSellNFT(_sellId *big.Int) (*types.Transaction, error) {
+	return _Farming.Contract.CancelSellNFT(&_Farming.TransactOpts, _sellId)
 }
 
-// CancelSell is a paid mutator transaction binding the contract method 0x07c9cd45.
+// CancelSellNFT is a paid mutator transaction binding the contract method 0xacd3db01.
 //
-// Solidity: function cancelSell(uint256 _sellId) returns()
-func (_Farming *FarmingTransactorSession) CancelSell(_sellId *big.Int) (*types.Transaction, error) {
-	return _Farming.Contract.CancelSell(&_Farming.TransactOpts, _sellId)
+// Solidity: function cancelSellNFT(uint256 _sellId) returns()
+func (_Farming *FarmingTransactorSession) CancelSellNFT(_sellId *big.Int) (*types.Transaction, error) {
+	return _Farming.Contract.CancelSellNFT(&_Farming.TransactOpts, _sellId)
 }
 
 // FinalizeBuyNFT is a paid mutator transaction binding the contract method 0x0fc6e4bf.
@@ -969,25 +1124,25 @@ func (_Farming *FarmingTransactorSession) RevokeRole(role [32]byte, account comm
 	return _Farming.Contract.RevokeRole(&_Farming.TransactOpts, role, account)
 }
 
-// Sell is a paid mutator transaction binding the contract method 0xe4849b32.
+// SellNFT is a paid mutator transaction binding the contract method 0xee9cdfb3.
 //
-// Solidity: function sell(uint256 _tokenId) returns()
-func (_Farming *FarmingTransactor) Sell(opts *bind.TransactOpts, _tokenId *big.Int) (*types.Transaction, error) {
-	return _Farming.contract.Transact(opts, "sell", _tokenId)
+// Solidity: function sellNFT(uint256 _tokenId) returns()
+func (_Farming *FarmingTransactor) SellNFT(opts *bind.TransactOpts, _tokenId *big.Int) (*types.Transaction, error) {
+	return _Farming.contract.Transact(opts, "sellNFT", _tokenId)
 }
 
-// Sell is a paid mutator transaction binding the contract method 0xe4849b32.
+// SellNFT is a paid mutator transaction binding the contract method 0xee9cdfb3.
 //
-// Solidity: function sell(uint256 _tokenId) returns()
-func (_Farming *FarmingSession) Sell(_tokenId *big.Int) (*types.Transaction, error) {
-	return _Farming.Contract.Sell(&_Farming.TransactOpts, _tokenId)
+// Solidity: function sellNFT(uint256 _tokenId) returns()
+func (_Farming *FarmingSession) SellNFT(_tokenId *big.Int) (*types.Transaction, error) {
+	return _Farming.Contract.SellNFT(&_Farming.TransactOpts, _tokenId)
 }
 
-// Sell is a paid mutator transaction binding the contract method 0xe4849b32.
+// SellNFT is a paid mutator transaction binding the contract method 0xee9cdfb3.
 //
-// Solidity: function sell(uint256 _tokenId) returns()
-func (_Farming *FarmingTransactorSession) Sell(_tokenId *big.Int) (*types.Transaction, error) {
-	return _Farming.Contract.Sell(&_Farming.TransactOpts, _tokenId)
+// Solidity: function sellNFT(uint256 _tokenId) returns()
+func (_Farming *FarmingTransactorSession) SellNFT(_tokenId *big.Int) (*types.Transaction, error) {
+	return _Farming.Contract.SellNFT(&_Farming.TransactOpts, _tokenId)
 }
 
 // SweepToken is a paid mutator transaction binding the contract method 0x1be19560.

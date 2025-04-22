@@ -12,7 +12,7 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
  * @title BEQNFT
  * @dev
  */
-contract BEQNFT is ERC721URIStorage, AccessControl, Pausable{
+contract BEQINDEX is ERC721URIStorage, AccessControl, Pausable{
 
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
 
@@ -26,7 +26,7 @@ contract BEQNFT is ERC721URIStorage, AccessControl, Pausable{
      */
     address public constant NATIVE_TOKEN_ADDRESS = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
 
-    constructor()  ERC721("BEQ NEC", "BEQNEC") {
+    constructor()  ERC721("BEQ INDEX", "BEQINDEX") {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
     }
 
@@ -37,14 +37,14 @@ contract BEQNFT is ERC721URIStorage, AccessControl, Pausable{
     function mint(address buyer) external onlyRole(MINTER_ROLE)  {
         uint256 tokenId = nextTokenId++;
         _mint(buyer, tokenId);
-        _setTokenURI(tokenId, "https://w3s.link/ipfs/bafkreifoup3t6upux2aqipxainjfmtnp7dzmpwe3hkw7su2uclleuzvpfi");
+        _setTokenURI(tokenId, "https://w3s.link/ipfs/bafkreicnc5qr7iclgqyrbpv3spdwg27pyxhymund3gziq45ubitcltnwbi");
     }
 
     function mintMany(address buyer, uint quantity) external onlyRole(MINTER_ROLE) {
         for (uint i = 0; i <= quantity; i++) {
             uint256 tokenId = nextTokenId++;
             _mint(buyer, tokenId);
-            _setTokenURI(tokenId, "https://w3s.link/ipfs/bafkreifoup3t6upux2aqipxainjfmtnp7dzmpwe3hkw7su2uclleuzvpfi");
+            _setTokenURI(tokenId, "https://w3s.link/ipfs/bafkreicnc5qr7iclgqyrbpv3spdwg27pyxhymund3gziq45ubitcltnwbi");
         }
     }
 

@@ -47,7 +47,7 @@ contract WealthFarming is AccessControl, Pausable, ReentrancyGuard{
     /**
      * @dev Token USDC use for trade
      */
-    IERC20 public usdcToken = IERC20(0xE33ede969FaF6D15f455a1C89aAb3d3F279C5b40);
+    IERC20 public usdcToken = IERC20(0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d);
 
     IBEQNFT public nftToken = IBEQNFT(0x5dA5c6AA2997603856C0EdfA0A1991a4081e2862);
 
